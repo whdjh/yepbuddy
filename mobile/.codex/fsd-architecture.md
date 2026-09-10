@@ -1,6 +1,6 @@
 # Feature-Sliced Design (FSD) 아키텍처 가이드
 
-이 문서는 이 저장소의 경계 판단과 import 규칙을 요약한다. 수정 대상 레이어의 `src/entities/README.md`, `src/features/README.md`, `src/shared/README.md`와 실제 import 사용처를 함께 읽는다. 예시를 맞추기 위한 폴더 생성이나 경계 이동은 하지 않는다.
+레이어 경계와 공개 API를 판단할 때 참고하는 프로젝트 규칙이다. 이 문서로 판단하기 어려운 계약만 해당 레이어의 `src/entities/README.md`, `src/features/README.md`, `src/shared/README.md`와 실제 사용처에서 확인한다. 예시를 맞추기 위한 폴더 생성이나 경계 이동은 하지 않는다.
 
 ## 계층 구조와 의존성
 
@@ -86,10 +86,7 @@ import { ResultScreen } from '@/features/view-result';
 
 `shared`는 slice별 barrel 구조를 사용하지 않는다. 현재 공개 방식인 `@/shared/ui/Button`, `@/shared/hooks/useCardColors`, `@/shared/lib/designTokens`처럼 파일 경로를 사용한다. 가이드의 통일성을 위해 `shared/index.ts`나 `shared/ui/index.ts`를 새로 만들지 않는다.
 
-## 변경 전후 확인
+## 경계 변경 시 확인
 
-1. 관련 레이어 README와 `rg` 검색으로 구현, 공개 export, 소비자를 확인한다.
-2. 책임이 잘못 놓였다는 근거가 있을 때 경계를 이동한다. 사용자 흐름은 `docs/page/*.md`와 대조한다.
-3. 공개 API를 바꾸면 `index.ts`와 소비자를 함께 확인하고 순환 import를 만들지 않는다.
-4. 기존 deep import 등 규칙과 다른 코드를 발견하면 현재 변경과의 관련성을 판단한다. 기존 사용처를 새 규칙으로 일반화하거나 무관한 전체 리팩터링을 하지 않는다.
-5. 변경한 동작과 경계에 필요한 검사만 실행하고 실행 결과와 확인하지 못한 부분을 보고한다.
+- 공개 API를 바꾸면 `index.ts`와 소비자를 확인하고 순환 import를 만들지 않는다.
+- 책임이 잘못 놓였다는 근거가 있을 때 경계를 이동한다. 기존 deep import 등 규칙과 다른 코드는 현재 변경과 관련된 범위에서 다루며, 기존 사용처를 새 규칙으로 일반화하지 않는다.

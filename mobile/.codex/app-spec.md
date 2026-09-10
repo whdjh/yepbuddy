@@ -24,11 +24,11 @@ YepBuddy(옙버디)는 운동 기록, 루틴 사이클, 운동 템포, 프로틴
 | 프로틴 | Supabase 조회, 가격 데이터 변환, 세일 알림 | `src/entities/protein/` |
 | 번역 | i18next, react-i18next, 앱 번역 리소스 | `src/shared/i18n/` |
 
-플랫폼별 렌더링과 기능 지원은 동일하다고 가정하지 않는다. 스타일과 컴포넌트 선택은 [디자인 원칙](design-principles.md), [디자인 토큰](design-tokens.md), [컴포넌트 가이드](component-guide.md)를 함께 확인한다.
+플랫폼별 렌더링과 기능 지원은 다를 수 있다. UI 작업에서 컴포넌트·토큰·레이아웃 기준이 필요하면 [UI 가이드](ui-guide.md)의 해당 절을 참고한다.
 
 ## 화면과 기능 진입점
 
-아래 코드 경로는 `mobile/` 기준이다. 변경할 화면의 기능서를 먼저 읽고 해당 라우트와 feature에서 필요한 범위만 추적한다.
+아래 코드 경로는 `mobile/` 기준이다. 화면 동작을 바꿀 때 해당 기능서의 요구사항과 관련 라우트·feature를 확인한다.
 
 | 화면·기능 | Canonical 문서 | 라우트·구현 진입점 |
 | --- | --- | --- |
@@ -57,4 +57,4 @@ YepBuddy(옙버디)는 운동 기록, 루틴 사이클, 운동 템포, 프로틴
 
 ## 변경 시 문서 유지
 
-상세 동작 변경은 관련 `docs/page/*.md`에 반영한다. 이 문서는 플랫폼, 기능 범위, 라우트 또는 구현 진입점이 바뀔 때 갱신한다. 상태·저장 계약은 [Entities 가이드](../src/entities/README.md), 화면 흐름과 계층 경계는 [Features 가이드](../src/features/README.md) 및 [FSD 가이드](fsd-architecture.md)를 확인한다.
+상세 동작 변경은 관련 `docs/page/*.md`에 반영한다. 이 문서는 플랫폼, 기능 범위, 라우트 또는 구현 진입점이 바뀔 때 갱신한다. 상태·저장 계약 판단에는 [Entities 가이드](../src/entities/README.md), 화면 흐름에는 [Features 가이드](../src/features/README.md), 계층 경계에는 [FSD 가이드](fsd-architecture.md)를 필요에 따라 참고한다.
