@@ -2,6 +2,8 @@
   "name": "yepbuddy-monorepo",
   "private": true,
   "scripts": {
+    "dev": "bun run mobile:ios",
+    "ios": "bun run mobile:ios",
     "mobile": "bun run --env-file=../.env.local --env-file=.env.local --cwd mobile start",
     "mobile:ios": "bun run --env-file=../.env.local --env-file=.env.local --cwd mobile ios",
     "mobile:android": "bun run --env-file=../.env.local --env-file=.env.local --cwd mobile android",
