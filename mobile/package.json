@@ -6,7 +6,7 @@
     "dev": "bun run ios",
     "start": "expo start",
     "android": "expo run:android",
-    "ios": "expo run:ios --device \"iPhone 17\"",
+    "ios": "expo run:ios",
     "web": "expo start --web",
     "lint": "expo lint"
   },
