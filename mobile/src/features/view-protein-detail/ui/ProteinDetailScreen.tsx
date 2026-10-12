@@ -1,5 +1,6 @@
-import { useEffect, useState } from "react"
-import { ScrollView, Text, View } from "react-native"
+import { openWebUrl } from "@/shared/lib/legalLinks"
+import { useEffect, useRef, useState } from "react"
+import { Alert, ScrollView, Text, View } from "react-native"
 import { useLocalSearchParams, useRouter } from "expo-router"
 import { useSafeAreaInsets } from "react-native-safe-area-context"
 import { useTranslation } from "react-i18next"
@@ -12,7 +13,6 @@ import { Card } from "@/shared/ui/Card"
 import {
   buildProteinDetail,
   fetchProtein,
-  fetchProteinFlavors,
   fetchProteinPrices,
   CoupangPartnersDisclosure,
   PriceTrendChart,
@@ -30,6 +30,7 @@ export function ProteinDetailScreen() {
 
   const { fg: fgColor } = useCardColors()
   const [protein, setProtein] = useState<ProteinDetail | null>(null)
+  const openingLink = useRef(false)
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState<string | null>(null)
 
@@ -56,14 +57,13 @@ export function ProteinDetailScreen() {
       setProtein(null)
 
       try {
-        const [proteinData, priceData, flavors] = await Promise.all([
+        const [proteinData, priceData] = await Promise.all([
           fetchProtein(selectedProteinId),
           fetchProteinPrices(selectedProteinId),
-          fetchProteinFlavors(selectedProteinId),
         ])
 
         if (!cancelled) {
-          setProtein(proteinData ? buildProteinDetail(proteinData, priceData, flavors) : null)
+          setProtein(proteinData ? buildProteinDetail(proteinData, priceData) : null)
         }
       } catch {
         if (!cancelled) {
@@ -109,7 +109,7 @@ export function ProteinDetailScreen() {
               <Text className="text-yb-fg text-yb-body-lg font-semibold shrink" numberOfLines={1}>
                 {protein?.name ?? t("protein.detail.title")}
               </Text>
-              {protein && (
+              {protein?.priceLevel && (
                 <Badge
                   level={protein.priceLevel}
                   label={t(`protein.levels.${protein.priceLevel}`)}
@@ -142,10 +142,10 @@ export function ProteinDetailScreen() {
         showsVerticalScrollIndicator={false}
         contentContainerClassName="px-yb-5 gap-yb-4 pb-yb-6"
       >
-        <CoupangPartnersDisclosure />
+        {protein.showPrices && <CoupangPartnersDisclosure />}
 
-        {/* 현재가 */}
-        <Card variant="glass">
+        {/* 최근 관측 가격 */}
+        {protein.showPrices && <Card variant="glass">
           <Card.Header label={t("protein.detail.currentPrice")} />
           <Card.Spacer size={12} />
           <Card.Row alignment="bottom">
@@ -158,7 +158,7 @@ export function ProteinDetailScreen() {
             <Card.Spacer />
             <Card.Caption>{pricePerGramLabel}</Card.Caption>
           </Card.Row>
-        </Card>
+        </Card>}
 
         {/* 특징 */}
         <Card variant="glass">
@@ -171,12 +171,12 @@ export function ProteinDetailScreen() {
         </Card>
 
         {/* 가격 추이 */}
-        <View>
+        {protein.showPrices && <View>
           <Text className="text-yb-fg-secondary text-yb-caption font-medium mb-yb-3">
             {t("protein.detail.priceTrend")}
           </Text>
           <PriceTrendChart data={protein.priceHistory} />
-        </View>
+        </View>}
       </ScrollView>
       )}
 
@@ -188,7 +188,20 @@ export function ProteinDetailScreen() {
         <Button
           variant="glass"
           label={t("protein.detail.buyNow")}
-          disabled
+          accessibilityRole="link"
+          accessibilityState={{ disabled: loading || !!error || !protein?.purchaseUrl }}
+          disabled={loading || !!error || !protein?.purchaseUrl}
+          onPress={async () => {
+            if (!protein?.purchaseUrl || openingLink.current) return
+            openingLink.current = true
+            try {
+              if (!await openWebUrl(protein.purchaseUrl)) {
+                Alert.alert(t("protein.detail.openLinkError"))
+              }
+            } finally {
+              openingLink.current = false
+            }
+          }}
         />
       </View>
     </View>

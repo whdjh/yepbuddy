@@ -369,11 +369,11 @@ features/
 주요 흐름:
 
 - route `id`가 없거나 배열이면 안전하게 단건 string으로 좁힌다.
-- 상품, 가격 히스토리, 맛 정보를 함께 조회한다.
+- 맛 평가를 포함한 상품과 가격 히스토리를 함께 조회한다. 마이프로틴은 가격 이력을 조회하지 않는다.
 - `buildProteinDetail`로 상세 model을 조립한다.
 - 가격/단위/특징/가격 추이를 렌더링한다.
 - `PriceTrendChart`는 날짜·가격 표시 입력을 만들고, 심박 차트와 동일한 스타일·점 선택 동작은 `MetricChart`가 처리한다.
-- 구매 버튼은 비활성 상태로 표시한다.
+- 구매 버튼은 일반 제품의 최신 가격 URL 또는 마이프로틴 고정 링크가 있을 때 활성화한다. 중복 링크 열기를 막고 실패 시 안내한다.
 - loading/error/not found 상태를 화면 안에서 처리한다.
 
 주요 컴포넌트:
@@ -385,7 +385,6 @@ features/
 
 - `fetchProtein`
 - `fetchProteinPrices`
-- `fetchProteinFlavors`
 - `buildProteinDetail`
 - `PriceTrendChart`
 - `CoupangPartnersDisclosure`
@@ -394,10 +393,11 @@ features/
 
 - `Badge`, `Button`, `IconButton`, `Card`
 - `useCardColors`
+- `openWebUrl`
 
 주요 side effect:
 
-- Supabase detail/history/flavor fetch through entity API
+- Supabase detail/history fetch through entity API (상품의 JSONB 맛 평가 포함)
 - safe external URL open
 - route back
 

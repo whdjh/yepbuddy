@@ -9,27 +9,21 @@ export type PriceBadge = {
 }
 
 export interface ApiProtein {
-  protein_id: number
-  title: string
+  supplement_id: number
+  name: string
   weight: number
-  avatar_file: string
   topic: ProteinCategory
   taste: string
-  description: string | null
-  scoop: number | null
+  description: string
+  scoop_weight: number | null
   protein_per_scoop: number | null
-  base_pack_count: number
-  base_date: string
-  url: string | null
-  created_at: string
-  updated_at: string
+  flavor_reviews: ApiProteinFlavor[]
 }
 
 export interface ApiProteinPrice {
-  protein_id: number
+  supplement_id: number
   observed_date: string
   price: number
-  available: boolean
   url?: string | null
   per_protein_gram?: number | null
   badge?: PriceBadge | null
@@ -41,11 +35,9 @@ export interface ApiProteinPriceResult {
 }
 
 export interface ApiProteinFlavor {
-  flavorId: number
   name: string
-  tier: "T1" | "T2" | "T3" | null
-  polarizing: boolean
-  note: string | null
+  tier: "T1" | "T2" | "T3"
+  note: string
 }
 
 export interface Protein {
@@ -57,7 +49,8 @@ export interface Protein {
   volume: number
   price: number | null
   pricePerGram: number | null
-  priceLevel: PriceLevel
+  priceLevel: PriceLevel | null
+  showPrices: boolean
   purchaseUrl: string | null
 }
 

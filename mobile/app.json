@@ -103,10 +103,12 @@
         "expo-build-properties",
         {
           "ios": {
-            "buildReactNativeFromSource": true
+            "buildReactNativeFromSource": true,
+            "deploymentTarget": "16.0"
           }
         }
-      ]
+      ],
+      "./plugins/with-ios-deployment-target"
     ],
     "extra": {
       "eas": {

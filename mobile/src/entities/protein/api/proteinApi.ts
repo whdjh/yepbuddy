@@ -1,10 +1,10 @@
+import { getMyproteinPurchaseUrl } from "../model/purchaseLinks"
 import { getSafeWebUrl } from "@/shared/lib/url"
 import { getSupabaseClient } from "./supabaseClient"
 import { decideBadge } from "../model/badge"
 import type { PriceStats } from "../model/badge"
 import type {
   ApiProtein,
-  ApiProteinFlavor,
   ApiProteinPrice,
   ApiProteinPriceResult,
   ProteinCategory,
@@ -25,7 +25,7 @@ function toApiRows(value: unknown): ApiRow[] {
 /** route/query string으로 들어온 상품 id를 DB primary key 숫자로 정규화 */
 function parseProteinId(id: string): number | null {
   const parsed = Number(id)
-  if (!Number.isInteger(parsed) || parsed <= 0) return null
+  if (!Number.isSafeInteger(parsed) || parsed <= 0) return null
   return parsed
 }
 
@@ -38,7 +38,7 @@ function toNonEmptyString(value: unknown): string | null {
 
 /** Supabase numeric/decimal/string 값을 계산 가능한 숫자로 정규화 */
 function toFiniteNumber(value: unknown): number | null {
-  if (value == null || value === "") return null
+  if ((typeof value !== "number" && typeof value !== "string") || String(value).trim() === "") return null
   const parsed = typeof value === "number" ? value : Number(value)
   return Number.isFinite(parsed) ? parsed : null
 }
@@ -46,19 +46,19 @@ function toFiniteNumber(value: unknown): number | null {
 /** DB row id처럼 양의 정수여야 하는 값을 검증 */
 function toPositiveInteger(value: unknown): number | null {
   const parsed = toFiniteNumber(value)
-  if (parsed == null || !Number.isInteger(parsed) || parsed <= 0) return null
+  if (parsed == null || !Number.isSafeInteger(parsed) || parsed <= 0) return null
   return parsed
-}
-
-/** DB/RPC가 boolean을 문자열이나 숫자로 돌려줘도 앱 boolean으로 정리 */
-function toBoolean(value: unknown) {
-  return value === true || value === "true" || value === 1
 }
 
 /** 외부 구매 링크는 http/https URL만 앱 모델에 남긴다. */
 function toSafeUrl(value: unknown): string | null {
   if (typeof value !== "string") return null
-  return getSafeWebUrl(value) || null
+  const safe = getSafeWebUrl(value)
+  try {
+    return safe && new URL(safe).hostname ? safe : null
+  } catch {
+    return null
+  }
 }
 
 /** RPC 결과의 분위수 통계를 배지 판정 로직에서 쓰는 숫자 타입으로 정규화 */
@@ -74,24 +74,24 @@ function toPriceStats(row: Record<string, unknown>): PriceStats {
   }
 }
 
-/** 상품 목록을 최신 등록순으로 조회하고 검색어/카테고리 필터를 선택적으로 적용 */
+/** 상품 목록을 등록순으로 조회하고 검색어/카테고리 필터를 선택적으로 적용 */
 export async function fetchProteins(params?: {
   q?: string
   topic?: ProteinCategory
 }) {
   const supabase = getSupabaseClient()
   let query = supabase
-    .from("proteins")
+    .from("yb_supplements")
     .select("*")
-    .order("created_at", { ascending: false })
+    .order("supplement_id", { ascending: true })
 
   const keyword = params?.q?.trim()
-  if (keyword) query = query.ilike("title", `%${keyword}%`)
+  if (keyword) query = query.ilike("name", `%${keyword}%`)
   if (params?.topic) query = query.eq("topic", params.topic)
 
   const { data, error } = await query
   if (error) throw new Error(error.message)
-  return (data ?? []) as ApiProtein[]
+  return toApiRows(data).map(parseSupplement)
 }
 
 /** 단일 상품이 없으면 null을 반환해 상세 화면에서 빈 상태를 처리 */
@@ -101,36 +101,35 @@ export async function fetchProtein(id: string) {
 
   const supabase = getSupabaseClient()
   const { data, error } = await supabase
-    .from("proteins")
+    .from("yb_supplements")
     .select("*")
-    .eq("protein_id", proteinId)
+    .eq("supplement_id", proteinId)
     .single()
 
   if (error) {
     if (error.code === "PGRST116") return null
     throw new Error(error.message)
   }
-  return data as ApiProtein | null
+  return data ? parseSupplement(data) : null
 }
 
 /** 목록 화면에서 사용할 각 상품의 최신 가격과 가격대 배지를 조회 */
 export async function fetchLatestProteinPrices(): Promise<ApiProteinPrice[]> {
   const supabase = getSupabaseClient()
-  const { data, error } = await supabase.rpc("get_latest_protein_prices")
+  const { data, error } = await supabase.rpc("yb_get_latest_supplement_prices")
   if (error) throw new Error(error.message)
 
   return toApiRows(data).flatMap((row) => {
-    const proteinId = toPositiveInteger(row.protein_id)
+    const proteinId = toPositiveInteger(row.supplement_id)
     const price = toFiniteNumber(row.price)
     const observedDate = toNonEmptyString(row.observed_date)
     if (proteinId == null || price == null || !observedDate) return []
 
     const stats = toPriceStats(row)
     const item: ApiProteinPrice = {
-      protein_id: proteinId,
+      supplement_id: proteinId,
       observed_date: observedDate,
       price,
-      available: toBoolean(row.available),
       url: toSafeUrl(row.url),
       per_protein_gram: toFiniteNumber(row.per_protein_gram),
       badge: decideBadge(price, stats),
@@ -145,14 +144,14 @@ export async function fetchProteinPrices(
   limit = 180,
 ): Promise<ApiProteinPriceResult> {
   const proteinId = parseProteinId(id)
-  if (proteinId == null) return { items: [], badge: null }
+  if (proteinId == null || getMyproteinPurchaseUrl(proteinId)) return { items: [], badge: null }
 
   const normalizedLimit = Number.isFinite(limit)
-    ? Math.max(1, Math.trunc(limit))
+    ? Math.min(366, Math.max(1, Math.trunc(limit)))
     : 180
   const supabase = getSupabaseClient()
-  const { data, error } = await supabase.rpc("get_protein_price_history", {
-    p_protein_id: proteinId,
+  const { data, error } = await supabase.rpc("yb_get_supplement_price_history", {
+    p_supplement_id: proteinId,
     p_limit: normalizedLimit,
   })
   if (error) throw new Error(error.message)
@@ -167,17 +166,16 @@ export async function fetchProteinPrices(
 
   // DB 숫자/nullable 필드를 앱에서 쓰는 타입으로 변환
   const items: ApiProteinPrice[] = rows.flatMap((row) => {
-    const rowProteinId = toPositiveInteger(row.protein_id)
+    const rowProteinId = toPositiveInteger(row.supplement_id)
     const rowPrice = toFiniteNumber(row.price)
     const observedDate = toNonEmptyString(row.observed_date)
     if (rowProteinId == null || rowPrice == null || !observedDate) return []
 
     return [
       {
-        protein_id: rowProteinId,
+        supplement_id: rowProteinId,
         observed_date: observedDate,
         price: rowPrice,
-        available: toBoolean(row.available),
         url: toSafeUrl(row.url),
         per_protein_gram: toFiniteNumber(row.per_protein_gram),
       },
@@ -190,43 +188,23 @@ export async function fetchProteinPrices(
   }
 }
 
-/** 맛 정보는 호불호가 낮은 항목, 티어, 이름 순서로 정렬해 상세 특징에 표시 */
-export async function fetchProteinFlavors(
-  id: string,
-): Promise<ApiProteinFlavor[]> {
-  const proteinId = parseProteinId(id)
-  if (proteinId == null) return []
-
-  const supabase = getSupabaseClient()
-  const { data, error } = await supabase
-    .from("protein_flavors")
-    .select("flavor_id, name, tier, polarizing, note")
-    .eq("protein_id", proteinId)
-    .order("polarizing", { ascending: true })
-    .order("tier", { ascending: true, nullsFirst: false })
-    .order("name", { ascending: true })
-
-  if (error) throw new Error(error.message)
-
-  return (data ?? []).flatMap((row) => {
-    const flavorId = toPositiveInteger(row.flavor_id)
-    const name = toNonEmptyString(row.name)
-    if (flavorId == null || !name) return []
-
-    const tier =
-      row.tier === "T1" || row.tier === "T2" || row.tier === "T3"
-        ? row.tier
-        : null
-    const note = toNonEmptyString(row.note)
-
-    return [
-      {
-        flavorId,
-        name,
-        tier,
-        polarizing: toBoolean(row.polarizing),
-        note,
-      },
-    ]
-  })
+function parseSupplement(row: ApiRow): ApiProtein {
+  const id = toPositiveInteger(row.supplement_id)
+  const weight = toPositiveInteger(row.weight)
+  const { name, topic, taste, description } = row
+  if (!id || !weight || typeof name !== "string" || typeof taste !== "string" ||
+      typeof description !== "string" ||
+      (topic !== "wpc" && topic !== "wpi" && topic !== "wpcwpi" &&
+       topic !== "creatine" && topic !== "beta-alanine")) {
+    throw new Error("Invalid supplement data")
+  }
+  return {
+    supplement_id: id, name, topic, taste, weight, description,
+    scoop_weight: toFiniteNumber(row.scoop_weight),
+    protein_per_scoop: toFiniteNumber(row.protein_per_scoop),
+    flavor_reviews: toApiRows(row.flavor_reviews).flatMap(({ name, tier, note }) =>
+      typeof name === "string" && typeof note === "string" &&
+      (tier === "T1" || tier === "T2" || tier === "T3")
+        ? [{ name, tier, note }] : []),
+  }
 }

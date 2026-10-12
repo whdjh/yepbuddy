@@ -1,3 +1,4 @@
+import { getMyproteinPurchaseUrl } from "./purchaseLinks"
 import type {
   ApiProtein,
   ApiProteinFlavor,
@@ -24,9 +25,9 @@ export function getProteinCategoryLabel(category: ProteinCategory) {
   return CATEGORY_LABELS[category]
 }
 
-// 가격 배지가 없을 때는 화면에서 중간 가격대로 취급
-function priceLevelOf(badge?: { kind: PriceLevel } | null): PriceLevel {
-  return badge?.kind ?? "mid"
+// 통계가 없으면 가격 배지를 표시하지 않는다.
+function priceLevelOf(badge?: { kind: PriceLevel } | null): PriceLevel | null {
+  return badge?.kind ?? null
 }
 
 /** 차트에 그릴 수 있는 날짜/가격 값만 가격 히스토리 포인트로 변환 */
@@ -63,14 +64,15 @@ function toFeatureLines(protein: ApiProtein, flavors: ApiProteinFlavor[]) {
 
 // 목록 화면에서 필요한 상품 정보와 최신 가격 정보를 하나의 모델로 합침
 export function mergeProteinListItems(proteins: ApiProtein[], prices: ApiProteinPrice[]): Protein[] {
-  const priceMap = new Map(prices.map((price) => [price.protein_id, price]))
+  const priceMap = new Map(prices.map((price) => [price.supplement_id, price]))
 
   return proteins.map((protein) => {
-    const latest = priceMap.get(protein.protein_id)
+    const purchaseUrl = getMyproteinPurchaseUrl(protein.supplement_id)
+    const latest = purchaseUrl ? undefined : priceMap.get(protein.supplement_id)
 
     return {
-      id: String(protein.protein_id),
-      name: protein.title,
+      id: String(protein.supplement_id),
+      name: protein.name,
       category: protein.topic,
       categoryLabel: getProteinCategoryLabel(protein.topic),
       flavor: protein.taste,
@@ -78,7 +80,8 @@ export function mergeProteinListItems(proteins: ApiProtein[], prices: ApiProtein
       price: latest?.price ?? null,
       pricePerGram: latest?.per_protein_gram ?? null,
       priceLevel: priceLevelOf(latest?.badge),
-      purchaseUrl: latest?.url ?? protein.url ?? null,
+      showPrices: !purchaseUrl,
+      purchaseUrl: purchaseUrl ?? latest?.url ?? null,
     }
   })
 }
@@ -87,11 +90,12 @@ export function mergeProteinListItems(proteins: ApiProtein[], prices: ApiProtein
 export function buildProteinDetail(
   protein: ApiProtein,
   priceResult: ApiProteinPriceResult,
-  flavors: ApiProteinFlavor[],
 ): ProteinDetail {
-  const latest = priceResult.items[0]
+  const purchaseUrl = getMyproteinPurchaseUrl(protein.supplement_id)
+  const items = purchaseUrl ? [] : priceResult.items
+  const latest = items[0]
   // API는 최신순으로 내려주므로 차트 표시용으로 오래된 날짜부터 정렬한다.
-  const priceHistory: PriceHistoryPoint[] = [...priceResult.items]
+  const priceHistory: PriceHistoryPoint[] = [...items]
     .reverse()
     .flatMap((price) => {
       const point = toPriceHistoryPoint(price)
@@ -99,17 +103,18 @@ export function buildProteinDetail(
     })
 
   return {
-    id: String(protein.protein_id),
-    name: protein.title,
+    id: String(protein.supplement_id),
+    name: protein.name,
     category: protein.topic,
     categoryLabel: getProteinCategoryLabel(protein.topic),
     flavor: protein.taste,
     volume: protein.weight,
     price: latest?.price ?? null,
     pricePerGram: latest?.per_protein_gram ?? null,
-    priceLevel: priceLevelOf(priceResult.badge),
-    purchaseUrl: latest?.url ?? protein.url ?? null,
-    features: toFeatureLines(protein, flavors),
+    priceLevel: purchaseUrl ? null : priceLevelOf(priceResult.badge),
+    showPrices: !purchaseUrl,
+    purchaseUrl: purchaseUrl ?? latest?.url ?? null,
+    features: toFeatureLines(protein, protein.flavor_reviews),
     priceHistory,
   }
 }

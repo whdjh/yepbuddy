@@ -107,7 +107,7 @@ export function ProteinListScreen() {
         contentContainerClassName="px-yb-5 pt-yb-2 pb-yb-30"
         showsVerticalScrollIndicator={false}
       >
-        <CoupangPartnersDisclosure />
+        {filteredProteins.some((protein) => protein.showPrices) && <CoupangPartnersDisclosure />}
         {statusMessage && (
           <Text className="text-yb-fg-secondary text-yb-body py-yb-4">
             {statusMessage}
