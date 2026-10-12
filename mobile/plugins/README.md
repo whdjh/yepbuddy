@@ -8,6 +8,7 @@ Expo config plugin과 iOS 네이티브 원본을 두는 영역이다. 현재는 
 
 ```text
 mobile/plugins/
+  with-ios-deployment-target.js
   with-workout-session.js
 
   ios/
@@ -66,6 +67,8 @@ consumeWorkoutLiveActivityCommands
 ```
 
 ## 책임 경계
+
+`with-ios-deployment-target.js`는 Podfile의 `post_install`에서 각 Pod의 최소 iOS 버전을 `expo-build-properties`의 `ios.deploymentTarget` 이상으로 맞춘다. CocoaPods는 앱의 platform 설정만으로 개별 podspec 최소 버전을 올리지 않으므로 Xcode 27에서 Expo Router의 iOS 16 API 컴파일 오류를 방지한다. 현재 앱의 최소 버전은 iOS 16.0이며, 더 높은 버전을 요구하는 Pod와 iOS 16.2 Widget Extension 설정은 유지한다.
 
 | 파일 | 책임 |
 | --- | --- |
