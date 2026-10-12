@@ -46,7 +46,7 @@ interface ProteinCardProps {
 export function ProteinCard({ protein, onPress }: ProteinCardProps) {
   const { t } = useTranslation()
   const { accent, fg, fgSecondary } = useCardColors()
-  const badgeColors = useBadgeColors(protein.priceLevel)
+  const badgeColors = useBadgeColors(protein.priceLevel ?? "mid")
 
   const price =
     protein.price != null ? `${protein.price.toLocaleString()}원` : "-"
@@ -61,6 +61,7 @@ export function ProteinCard({ protein, onPress }: ProteinCardProps) {
         <Card.Row spacing={8} alignment="center">
           <Card.Title size={16}>{protein.name}</Card.Title>
           <Card.Spacer />
+          {protein.priceLevel && (
           <SwiftText
             modifiers={[
               font({ size: 12, weight: "bold" }),
@@ -75,6 +76,7 @@ export function ProteinCard({ protein, onPress }: ProteinCardProps) {
           >
             {t(`protein.levels.${protein.priceLevel}`)}
           </SwiftText>
+          )}
         </Card.Row>
 
         <Card.Spacer size={14} />
@@ -99,6 +101,7 @@ export function ProteinCard({ protein, onPress }: ProteinCardProps) {
                 {`${protein.volume.toLocaleString()}g · ${protein.categoryLabel} · ${protein.flavor}`}
               </SwiftText>
             </Card.Row>
+            {protein.showPrices && (
             <Card.Row spacing={4} alignment="firstTextBaseline">
               <SwiftText
                 modifiers={[
@@ -117,10 +120,12 @@ export function ProteinCard({ protein, onPress }: ProteinCardProps) {
                 {price}
               </SwiftText>
             </Card.Row>
+            )}
           </Card.Column>
 
           <Card.Spacer />
 
+          {protein.showPrices && protein.pricePerGram != null && (
           <Card.Column alignment="trailing" spacing={2}>
             <SwiftText
               modifiers={[
@@ -139,6 +144,7 @@ export function ProteinCard({ protein, onPress }: ProteinCardProps) {
               {pricePerGram}
             </SwiftText>
           </Card.Column>
+          )}
         </Card.Row>
       </Card>
     </Pressable>

@@ -23,7 +23,6 @@ export {
 export {
   fetchLatestProteinPrices,
   fetchProtein,
-  fetchProteinFlavors,
   fetchProteinPrices,
   fetchProteins,
 } from "./api/proteinApi"

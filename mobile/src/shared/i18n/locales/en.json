@@ -341,7 +341,8 @@
     "detail": {
       "title": "Details",
       "features": "Features",
-      "currentPrice": "Current Price",
+      "currentPrice": "Latest observed low",
+      "openLinkError": "Could not open the purchase link. Please try again.",
       "priceTrend": "Price Trend",
       "buyNow": "Buy Now",
       "notFound": "Product not found",
