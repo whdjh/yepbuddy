@@ -189,7 +189,7 @@ Feature 사용처:
 
 처음 볼 파일:
 
-- `api/proteinApi.ts`: Supabase 테이블/RPC 조회, id/숫자/URL/boolean 입력 정규화
+- `api/proteinApi.ts`: Supabase 테이블/RPC 조회, id/숫자/URL/JSONB 입력 정규화
 - `api/supabaseClient.ts`: env 또는 Expo config에서 Supabase 설정을 읽고 client를 재사용
 - `model/adapters.ts`: API row와 가격 row를 `Protein`, `ProteinDetail`로 조립
 - `model/badge.ts`: 가격 분위수 기준 배지 판정
@@ -197,7 +197,7 @@ Feature 사용처:
 
 공개 API는 `protein/index.ts`에서만 export한다.
 
-- API: `fetchProteins`, `fetchProtein`, `fetchLatestProteinPrices`, `fetchProteinPrices`, `fetchProteinFlavors`
+- API: `fetchProteins`, `fetchProtein`, `fetchLatestProteinPrices`, `fetchProteinPrices`
 - Adapter: `mergeProteinListItems`, `buildProteinDetail`, `getProteinCategoryLabel`
 - UI: `ProteinCard`, `PriceTrendChart`, `CoupangPartnersDisclosure`
 - 타입: `Protein`, `ProteinDetail`, `ProteinCategory`, API row/price/history 타입
@@ -209,7 +209,7 @@ Feature 사용처:
 
 `PriceTrendChart`는 가격 이력을 순서 X·가격 Y로 변환하고 날짜·원화 formatter와 라벨만 `MetricChart`에 전달한다. 색상·높이·채움·최고최저 가이드와 점 선택 동작은 공용 컴포넌트가 심박 차트와 동일하게 처리하며, 가격 평균은 표시하지 않는다. 화면 계약은 [프로틴 기능서](../../docs/page/10_protein.md)를 따른다.
 
-현재 상세 화면의 구매 버튼은 비활성 상태다. `protein` entity 내부에서는 React Native의 URL 열기 API를 직접 호출하지 않는다.
+상세 화면은 일반 제품의 최신 가격 URL 또는 마이프로틴의 고정 링크로 구매 버튼을 연결한다. URL이 없으면 비활성화한다. 마이프로틴은 가격을 표시하지 않고 제품의 `flavor_reviews`를 사용한다. `protein` entity 내부에서는 React Native의 URL 열기 API를 직접 호출하지 않는다.
 
 ## Shared API 사용
 
@@ -271,10 +271,12 @@ Workout session AsyncStorage:
 
 Protein은 로컬 저장소를 쓰지 않는다. Supabase에서는 다음을 사용한다.
 
-- table `proteins`
-- table `protein_flavors`
-- RPC `get_latest_protein_prices`
-- RPC `get_protein_price_history`
+- table `yb_supplements` (`flavor_reviews` JSONB 포함)
+- table `yb_supplement_prices_daily` (RPC에서 조회)
+- RPC `yb_get_latest_supplement_prices`
+- RPC `yb_get_supplement_price_history`
+- 고정 마이프로틴 구매 링크: `model/purchaseLinks.ts`의 제품 ID 10·11. RPC도 동일한 두 ID의 가격을 제외한다.
+- 등록 데이터와 미구현 수집기 규칙: [Worker 가이드](../../../worker/README.md#보충제-수집기-전환--미구현)
 
 ## 주요 Side Effect
 
