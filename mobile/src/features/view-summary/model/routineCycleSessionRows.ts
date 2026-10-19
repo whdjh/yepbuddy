@@ -126,31 +126,22 @@ function getPlannedRoutineRow(
   }
 }
 
-// 현재 루틴 사이클의 슬롯만 카드 행으로 생성
+// 현재 루틴 사이클의 완료 세션을 완료 시각순으로, 예정 슬롯을 루틴 순서로 표시
 export function buildRoutineCycleSessionRows(
   input: BuildRoutineCycleSessionRowsInput,
 ): RoutineCycleSessionRow[] {
   const emittedSessionIds = new Set<string>()
-  const rows: RoutineCycleSessionRow[] = []
+  const completedSessions: StoredWorkoutSession[] = []
+  const plannedRows: RoutineCycleSessionRow[] = []
 
   input.progress.slots.forEach((slot) => {
     if (
-      slot.status === "substituted" &&
+      (slot.status === "completed" || slot.status === "substituted") &&
       slot.matchedSession &&
       !emittedSessionIds.has(slot.matchedSession.sessionId)
     ) {
       emittedSessionIds.add(slot.matchedSession.sessionId)
-      rows.push(getActualSessionRow(slot.matchedSession, input))
-      return
-    }
-
-    if (
-      slot.status === "completed" &&
-      slot.matchedSession &&
-      !emittedSessionIds.has(slot.matchedSession.sessionId)
-    ) {
-      emittedSessionIds.add(slot.matchedSession.sessionId)
-      rows.push(getActualSessionRow(slot.matchedSession, input))
+      completedSessions.push(slot.matchedSession)
       return
     }
 
@@ -159,9 +150,18 @@ export function buildRoutineCycleSessionRows(
       slot.status !== "substituted" &&
       !input.hidePlannedRows
     ) {
-      rows.push(getPlannedRoutineRow(slot.routineSession, input))
+      plannedRows.push(getPlannedRoutineRow(slot.routineSession, input))
     }
   })
 
-  return rows
+  completedSessions.sort(
+    (left, right) =>
+      new Date(left.completedAt).getTime() -
+      new Date(right.completedAt).getTime(),
+  )
+
+  return [
+    ...completedSessions.map((session) => getActualSessionRow(session, input)),
+    ...plannedRows,
+  ]
 }
