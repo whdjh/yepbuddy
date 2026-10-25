@@ -26,4 +26,4 @@
 
 진입점: [shared](../../src/shared/README.md), [FSD 규칙](../../.codex/fsd-architecture.md), [features](../../src/features/README.md), [탭](../../src/app/(tabs)/_layout.tsx).
 
-저장된 source·카드 ID·legacy 형식과 native payload는 사용처 없는 코드와 구분해 보존한다. 200줄을 넘었다는 이유만으로 파일을 나누지 않는다. 상수 Context·요약 wrapper는 다음 화면 상태 PR에서 함께 정리한다.
+저장된 source·카드 ID·legacy 형식과 native payload는 사용처 없는 코드와 구분해 보존한다. 200줄을 넘었다는 이유만으로 파일을 나누지 않는다. 상수 Context·요약 wrapper 정리는 이 작업에 포함하지 않는다.

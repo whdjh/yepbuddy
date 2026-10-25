@@ -1,8 +1,8 @@
 # 07. Android 공용 UI·탭·조회 화면
 
-> 상태: 대기
+> 상태: 보류 — Android 지원 방향 결정 후 착수
 >
-> 선행: [01](01-code-cleanup.md), [06](06-mobile-build.md)
+> 선행: [01](01-code-cleanup.md)
 
 ## 목표와 범위
 
@@ -27,4 +27,4 @@
 
 진입점: [shared UI 가이드](../../src/shared/README.md), [UI·토큰·레이아웃 가이드](../../.codex/ui-guide.md), [화면 기능서](../page/README.md).
 
-일반 정적 UI는 NativeWind·기존 토큰을 우선한다. style·크기 지정은 native API와 부모 제약에 맞게 판단하고 실제 차이가 있을 때만 플랫폼 파일을 분리한다. 입력·설정·운동 복합 화면은 다음 PR에서 마무리한다.
+일반 정적 UI는 NativeWind·기존 토큰을 우선한다. style·크기 지정은 native API와 부모 제약에 맞게 판단하고 실제 차이가 있을 때만 플랫폼 파일을 분리한다. 입력·설정·운동 복합 화면은 이 작업에 포함하지 않는다.
