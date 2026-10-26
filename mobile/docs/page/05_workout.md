@@ -287,9 +287,12 @@ iOS에서는 운동이 `recording` 또는 `paused` 상태일 때 ActivityKit Liv
 - Expanded trailing에는 경과 시간을 표시하고, 유산소 기록 중이면 `figure.run`을 함께 표시한다.
 - Expanded trailing에서 현재 심박수가 `0`보다 크면 `heart.fill`, 정수 심박수, `BPM`을 추가로 표시한다.
 - Expanded bottom에는 유산소 시작, 일시정지/재개, 운동 종료 제어 버튼을 표시한다.
-- Compact leading과 minimal은 근력 운동 중 `figure.strengthtraining.traditional`, 유산소 기록 중 `figure.run`을 표시한다.
-- Compact trailing은 현재 심박수가 `0`보다 클 때만 `heart.fill`과 정수 심박수를 표시한다.
-- 심박수가 없거나 `0`이면 `--` 같은 대체 문구 없이 심박수 영역을 숨긴다.
+- Compact leading은 근력 운동 중 `figure.strengthtraining.traditional`, 유산소 기록 중 `figure.run`을 표시한다.
+- Compact trailing은 위에 현재 심박수가 `0`보다 클 때만 `heart.fill`과 정수 심박수, 아래에 누적 운동 시간을 표시한다.
+- Minimal은 누적 운동 시간만 표시한다.
+- iOS 18 이상에서는 시스템 자동 갱신으로 `24분`처럼 분 단위로 표시한다. 1분 미만은 `0분`, 1시간 이상도 `60분`, `125분`처럼 누적 분을 유지한다. 일시정지 중에는 `timerPausedAt` 기준으로 고정한다.
+- iOS 16·17에서는 분 전용 자동 갱신을 지원하지 않아 `분:초` 타이머로 표시한다. 별도의 앱 타이머나 심박수 갱신에 의존하지 않는다.
+- 심박수가 없거나 `0`이면 `--` 같은 대체 문구 없이 심박수 영역을 숨기고 시간은 계속 표시한다.
 
 ### 5.5 저장하지 않고 종료하기
 

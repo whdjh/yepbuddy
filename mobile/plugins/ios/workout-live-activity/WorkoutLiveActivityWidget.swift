@@ -30,6 +30,46 @@ private struct WorkoutLiveActivityTimerText: View {
   }
 }
 
+// Dynamic Island 누적 운동 시간
+private struct WorkoutLiveActivityMinutesText: View {
+  let timerStartAt: Date
+  let timerPausedAt: Date?
+
+  @available(iOSApplicationExtension 18.0, macOS 15.0, *)
+  private var minuteFormat: SystemFormatStyle.Timer {
+    .init(
+      countingUpIn: timerStartAt..<Date.distantFuture,
+      showsHours: false,
+      maxFieldCount: 1,
+      maxPrecision: .seconds(60)
+    )
+    .locale(Locale(identifier: "ko_KR"))
+  }
+
+  var body: some View {
+    Group {
+      if #available(iOSApplicationExtension 18.0, macOS 15.0, *) {
+        if let timerPausedAt {
+          Text(timerPausedAt, format: minuteFormat)
+        } else {
+          Text(.currentDate, format: minuteFormat)
+        }
+      } else {
+        // iOS 16·17은 분 전용 자동 갱신을 지원하지 않아 분:초로 표시한다.
+        Text(
+          timerInterval: timerStartAt...Date.distantFuture,
+          pauseTime: timerPausedAt,
+          countsDown: false,
+          showsHours: false
+        )
+      }
+    }
+    .monospacedDigit()
+    .lineLimit(1)
+    .minimumScaleFactor(0.7)
+  }
+}
+
 // 현재 심박수
 private struct WorkoutLiveActivityHeartRateText: View {
   let heartRate: Int
@@ -307,20 +347,29 @@ struct WorkoutLiveActivityWidget: Widget {
           )
           .foregroundStyle(Color.workoutAccent)
       } compactTrailing: {
-        if let heartRate = context.state.heartRate, heartRate > 0 {
-          WorkoutLiveActivityHeartRateText(heartRate: heartRate, showsUnit: false)
-            .font(.caption.weight(.semibold))
-            .foregroundStyle(.white)
-        }
-      } minimal: {
-        let minimalSystemName =
-          context.state.cardioStartedAt == nil ? "figure.strengthtraining.traditional" : "figure.run"
+        VStack(alignment: .trailing, spacing: 1) {
+          if let heartRate = context.state.heartRate, heartRate > 0 {
+            WorkoutLiveActivityHeartRateText(heartRate: heartRate, showsUnit: false)
+              .font(.system(size: 10, weight: .semibold))
+              .foregroundStyle(.white)
+          }
 
-        Image(systemName: minimalSystemName)
-          .accessibilityLabel(
-            context.state.cardioStartedAt == nil ? "근력 운동" : "유산소 기록 중"
+          WorkoutLiveActivityMinutesText(
+            timerStartAt: context.state.timerStartAt,
+            timerPausedAt: context.state.timerPausedAt
           )
+          .font(.system(size: 13, weight: .semibold, design: .rounded))
           .foregroundStyle(Color.workoutAccent)
+        }
+        .frame(width: 44, alignment: .trailing)
+      } minimal: {
+        WorkoutLiveActivityMinutesText(
+          timerStartAt: context.state.timerStartAt,
+          timerPausedAt: context.state.timerPausedAt
+        )
+        .font(.system(size: 10, weight: .semibold, design: .rounded))
+        .foregroundStyle(Color.workoutAccent)
+        .frame(width: 36)
       }
       .keylineTint(Color.workoutAccent)
       .contentMargins(.all, 16, for: .expanded)

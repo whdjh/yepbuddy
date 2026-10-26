@@ -181,9 +181,12 @@ iOS 운동 Live Activity는 현재 진행 중인 운동 세션에 대해서만 �
 - Expanded leading: `옙버디`와 현재 상태 문구
 - Expanded trailing: 경과 시간, 유산소 기록 중 `figure.run`, 값이 있을 때 현재 심박수와 `BPM`
 - Expanded bottom: 유산소 시작, 일시정지/재개, 운동 종료 제어 버튼
-- Compact leading/minimal: 근력 운동 중 `figure.strengthtraining.traditional`, 유산소 기록 중 `figure.run`
-- Compact trailing: 값이 있을 때 `heart.fill`과 정수 심박수
-- 심박수가 없거나 `0`이면 `--` 없이 심박수 영역을 숨긴다.
+- Compact leading: 근력 운동 중 `figure.strengthtraining.traditional`, 유산소 기록 중 `figure.run`
+- Compact trailing: 위에 값이 있을 때 `heart.fill`과 정수 심박수, 아래에 누적 운동 시간
+- Minimal: 누적 운동 시간만 표시
+- iOS 18 이상은 `24분`처럼 시스템이 자동 갱신하는 누적 분 표시를 사용한다. 1분 미만은 `0분`, 1시간 이상도 `60분`, `125분`으로 표시하고 일시정지 중에는 시간을 고정한다.
+- iOS 16·17은 자동 갱신을 유지하기 위해 `분:초` 표시를 사용한다.
+- 심박수가 없거나 `0`이면 `--` 없이 심박수 영역을 숨기고 시간은 계속 표시한다.
 
 심박수 갱신:
 
@@ -346,4 +349,4 @@ Android에서는 다음 notification channel을 사용한다.
 5. `syncWorkoutPlaceArrivalReminder`는 `allowPrompt: false`에서 권한이 없으면 geofence를 중지하고 `operational=false`를 저장하지만, 사용자의 enabled 의도는 보존한다.
 6. 프로틴 세일과 운동 장소 알림은 응답 핸들러가 있지만, 운동 리마인더의 `kind: workoutReminder`를 처리하는 별도 탭 라우팅은 현재 없다.
 7. iOS 운동 Live Activity는 ActivityKit 기능이며 Android 알림 채널을 사용하지 않는다.
-8. Dynamic Island 제어 버튼은 Expanded 표시에서만 제공하며 Compact와 Minimal 표시는 상태 아이콘과 심박수 정보만 제공한다.
+8. Dynamic Island 제어 버튼은 Expanded 표시에서만 제공한다. Compact는 운동 아이콘·심박수·시간을, Minimal은 시간만 제공한다.
