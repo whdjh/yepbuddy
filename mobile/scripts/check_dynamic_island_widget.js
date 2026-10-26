@@ -18,14 +18,14 @@ const widgetPaths = [
     "WorkoutLiveActivityWidget.swift",
   ),
 ]
-const workoutContextPath = path.join(
+const liveActivityHookPath = path.join(
   __dirname,
   "..",
   "src",
   "entities",
   "workout-session",
   "model",
-  "WorkoutContext.tsx",
+  "useWorkoutLiveActivity.ts",
 )
 const liveActivityApiPath = path.join(
   __dirname,
@@ -170,8 +170,21 @@ for (const widgetPath of widgetPaths) {
   )
 
   requirePattern(
-    /minimal:\s*\{[\s\S]*minimalSystemName[\s\S]*\}/,
-    "minimal presentation must use status icon selection without command buttons",
+    /minimal:\s*\{\s*WorkoutLiveActivityMinutesText\(/,
+    "minimal presentation must show elapsed minutes",
+  )
+
+  requirePattern(
+    /countingUpIn:\s*timerStartAt\.\.<Date\.distantFuture,\s*showsHours:\s*false,\s*maxFieldCount:\s*1,\s*maxPrecision:\s*\.seconds\(60\)/,
+    "minute format must count up in cumulative minutes without seconds",
+  )
+  requirePattern(
+    /if let timerPausedAt\s*\{\s*Text\(timerPausedAt, format: minuteFormat\)\s*\}\s*else\s*\{\s*Text\(\.currentDate, format: minuteFormat\)/,
+    "minute display must freeze while paused and use system updates while running",
+  )
+  requirePattern(
+    /pauseTime:\s*timerPausedAt,\s*countsDown:\s*false,\s*showsHours:\s*false/,
+    "older iOS must retain an automatically updating, pause-aware timer",
   )
 
   const compactLeadingSection = sectionBetween(
@@ -193,6 +206,15 @@ for (const widgetPath of widgetPaths) {
     /DynamicIslandExpandedRegion\(\.trailing\)\s*\{/,
     /DynamicIslandExpandedRegion\(\.bottom\)\s*\{/,
     "expanded trailing section is missing",
+  )
+
+  if (!/VStack\(alignment: \.trailing, spacing: 1\)[\s\S]*WorkoutLiveActivityHeartRateText[\s\S]*WorkoutLiveActivityMinutesText\([\s\S]*timerStartAt: context\.state\.timerStartAt,[\s\S]*timerPausedAt: context\.state\.timerPausedAt/.test(compactTrailingSection)) {
+    fail("compact trailing must stack optional heart rate above the pause-aware elapsed time")
+  }
+  rejectPatternInSection(
+    minimalSection,
+    /minimalSystemName|WorkoutLiveActivityHeartRateText|Image\(/,
+    "minimal presentation must show only elapsed time",
   )
 
   requirePattern(
@@ -222,8 +244,8 @@ for (const widgetPath of widgetPaths) {
   )
 }
 
-currentLabel = path.relative(path.join(__dirname, ".."), workoutContextPath)
-source = fs.readFileSync(workoutContextPath, "utf8")
+currentLabel = path.relative(path.join(__dirname, ".."), liveActivityHookPath)
+source = fs.readFileSync(liveActivityHookPath, "utf8")
 requirePattern(
   /startWorkoutLiveActivity\(\{[\s\S]*heartRate:\s*state\.heartRate/,
   "foreground Live Activity updates must pass the current heart rate",
