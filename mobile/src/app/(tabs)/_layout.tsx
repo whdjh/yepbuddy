@@ -1,13 +1,17 @@
 import { NativeTabs } from "expo-router/unstable-native-tabs"
 import { WorkoutNavigationGuard } from "@/features/do-workout/ui/WorkoutNavigationGuard"
+import { useResolvedColorToken } from "@/shared/hooks/useResolvedColorToken"
+import { semanticColorTokens } from "@/shared/lib/designTokens"
 
 const PROTEIN_TAB_ENABLED = true
 
 export default function TabLayout() {
+  const tintColor = useResolvedColorToken(semanticColorTokens.accent)
+
   return (
     <>
       <WorkoutNavigationGuard />
-      <NativeTabs tintColor="#D4883A">
+      <NativeTabs tintColor={tintColor}>
         <NativeTabs.Trigger name="index">
           <NativeTabs.Trigger.Icon sf="book.fill" md="menu_book" />
           <NativeTabs.Trigger.Label>일지</NativeTabs.Trigger.Label>

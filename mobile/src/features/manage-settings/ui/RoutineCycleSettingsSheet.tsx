@@ -13,6 +13,7 @@ import {
 } from "react-native-gesture-handler"
 import { useTranslation } from "react-i18next"
 import { SafeAreaView } from "react-native-safe-area-context"
+import { primitiveColors } from "@/shared/lib/designTokens"
 import {
   createDefaultRoutineCycleSettings,
   MAX_ROUTINE_CYCLE_SPLIT_COUNT,
@@ -173,11 +174,14 @@ export function RoutineCycleSettingsSheet({
       <GestureHandlerRootView style={StyleSheet.absoluteFill}>
         <View className={Platform.OS === "ios"
           ? "absolute inset-0 bg-yb-surface"
-          : "absolute inset-0 justify-end bg-black/25"}
+          : "absolute inset-0 justify-end"}
         >
           {Platform.OS !== "ios" && (
             <GesturePressable
-              style={StyleSheet.absoluteFill}
+              style={[
+                StyleSheet.absoluteFill,
+                { backgroundColor: primitiveColors.black, opacity: 0.25 },
+              ]}
               onPress={handleRequestClose}
               accessibilityRole="button"
               accessibilityLabel={t("common.close")}

@@ -12,8 +12,9 @@ import Animated, {
   withTiming,
 } from "react-native-reanimated"
 import { useResolvedColorToken } from "@/shared/hooks/useResolvedColorToken"
-import { semanticColorTokens } from "@/shared/lib/designTokens"
+import { primitiveColors, semanticColorTokens } from "@/shared/lib/designTokens"
 import { SymbolView } from "@/shared/ui/SymbolView"
+import componentTokens from "@/tokens/component.json"
 import { useWorkoutTimer } from "../lib/useWorkoutTimer"
 import {
   canEndWorkoutFromDrawer,
@@ -81,7 +82,9 @@ export function WorkoutDrawer({
   const canStartCardio = !isPaused && !hasCardioStarted
   const cardioButtonOpacity = isPaused && !hasCardioStarted ? 0.55 : 1
   const timerControlBackgroundColor =
-    timerControl.tone === "neutral" ? "rgba(255,255,255,0.12)" : accentColor
+    timerControl.tone === "neutral"
+      ? componentTokens["bottom-drawer"]["btn-pause-bg"]
+      : accentColor
 
   const openDrawer = () => {
     translateY.value = withSpring(0, SPRING_CONFIG)
@@ -119,7 +122,7 @@ export function WorkoutDrawer({
   }))
 
   const cardioPulseAnimatedStyle = useAnimatedStyle(() => ({
-    opacity: 0.48 * (1 - cardioPulseProgress.value),
+    opacity: 0.44 * 0.48 * (1 - cardioPulseProgress.value),
     transform: [{ scale: 0.9 + cardioPulseProgress.value * 0.26 }],
   }))
 
@@ -165,7 +168,7 @@ export function WorkoutDrawer({
             }}
             className="items-center justify-center rounded-full"
             style={{
-              backgroundColor: "rgba(255,255,255,0.08)",
+              backgroundColor: componentTokens["bottom-drawer"]["btn-bg"],
               height: 48,
               opacity: cardioButtonOpacity,
               position: "relative",
@@ -178,7 +181,7 @@ export function WorkoutDrawer({
                 className="absolute rounded-full"
                 style={[
                   {
-                    borderColor: "rgba(255,255,255,0.44)",
+                    borderColor: primitiveColors.white,
                     borderWidth: 2,
                     height: 56,
                     left: -4,
