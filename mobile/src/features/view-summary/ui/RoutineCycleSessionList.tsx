@@ -31,7 +31,7 @@ export function RoutineCycleSessionList({
 
   return (
     <Pressable onLongPress={onLongPress} delayLongPress={450}>
-      <Card variant="glass">
+      <Card key={JSON.stringify(sessions.map((session) => session.id))} variant="glass">
         <Card.Header
           label={t("summary.routineCycleSessions")}
           badge={badgeText}
