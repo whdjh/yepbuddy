@@ -1,4 +1,5 @@
 import type { BodyPart, BodyPartDetail } from "./types"
+import { sortByBodyPart } from "./bodyPartSet"
 
 // 루틴 세션 내 단일 운동 부위 항목
 export interface RoutinePart {
@@ -129,7 +130,10 @@ export function normalizeRoutineCycleSettings(
       : DEFAULT_ROUTINE_CYCLE_SESSIONS
 
   return {
-    sessions: resizeRoutineCycleSessions(baseSessions, splitCount),
+    sessions: resizeRoutineCycleSessions(baseSessions, splitCount).map((session) => ({
+      ...session,
+      parts: sortByBodyPart(session.parts),
+    })),
     cycleStartDateKey:
       settings.cycleStartDateKey ?? fallbackCycleStartDateKey,
     cycleStartedAtIso:

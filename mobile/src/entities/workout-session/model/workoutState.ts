@@ -9,6 +9,7 @@ import type {
 import { EMPTY_WORKOUT_LIVE_STATS } from "./types"
 import { normalizeMetricCount } from "./metricNormalization"
 import type { RoutinePart } from "./routineCycle"
+import { sortByBodyPart } from "./bodyPartSet"
 
 // 운동 세션이 화면에서 어떤 단계에 있는지
 export type WorkoutPhase =
@@ -184,7 +185,7 @@ export function workoutReducer(
           // 이미 선택한 부위면 선택 해제
           ? state.bodyParts.filter(({ part }) => part !== action.payload)
           // 새로 선택한 부위면 기본 세트 수 10으로 추가
-          : [...state.bodyParts, { part: action.payload, setCount: 10 }],
+          : sortByBodyPart([...state.bodyParts, { part: action.payload, setCount: 10 }]),
       }
     }
     // 세트 수 변경 액션 처리
@@ -282,7 +283,7 @@ export function workoutReducer(
 
       return {
         ...state,
-        bodyParts: [...state.bodyParts, { part, detail, setCount: 10 }],
+        bodyParts: sortByBodyPart([...state.bodyParts, { part, detail, setCount: 10 }]),
       }
     }
     // 루틴 템플릿 적용 액션 처리
@@ -290,7 +291,7 @@ export function workoutReducer(
       // 추천된 루틴 세션의 부위로 기존 선택을 대체
       return {
         ...state,
-        bodyParts: action.payload.map((item) => ({
+        bodyParts: sortByBodyPart(action.payload).map((item) => ({
           part: item.part,
           details: item.details,
           setCount: 10,
@@ -300,7 +301,7 @@ export function workoutReducer(
     case "APPLY_BODY_PART_SETS":
       return {
         ...state,
-        bodyParts: action.payload.map((item) => ({
+        bodyParts: sortByBodyPart(action.payload).map((item) => ({
           ...item,
           setCount: Number.isFinite(item.setCount)
             ? Math.max(1, Math.round(item.setCount))
@@ -313,6 +314,7 @@ export function workoutReducer(
       return {
         ...initialWorkoutState,
         ...action.payload,
+        bodyParts: sortByBodyPart(action.payload.bodyParts),
         cardioStartedAt: action.payload.cardioStartedAt ?? null,
       }
     // 초기화 액션 처리

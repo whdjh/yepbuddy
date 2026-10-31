@@ -19,6 +19,7 @@ import {
   MAX_ROUTINE_CYCLE_SPLIT_COUNT,
   MIN_ROUTINE_CYCLE_SPLIT_COUNT,
   resizeRoutineCycleSessions,
+  sortByBodyPart,
   type BodyPart,
   type BodyPartDetail,
   type RoutinePart,
@@ -102,7 +103,7 @@ export function RoutineCycleSettingsSheet({
     setDraft((current) => ({
       ...current,
       sessions: current.sessions.map((session, sessionIndex) =>
-        sessionIndex === index ? { ...session, parts } : session,
+        sessionIndex === index ? { ...session, parts: sortByBodyPart(parts) } : session,
       ),
     }))
   }

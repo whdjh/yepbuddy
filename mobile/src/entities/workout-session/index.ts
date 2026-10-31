@@ -136,6 +136,7 @@ export type {
 export type { WorkoutState } from "./model/workoutState"
 export { BODY_PART_DETAILS, EMPTY_WORKOUT_LIVE_STATS } from "./model/types"
 export {
+  sortByBodyPart,
   getUniqueWorkoutBodyParts,
   getWorkoutBodyPartDetails,
   getWorkoutBodyPartSetKey,
