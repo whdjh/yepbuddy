@@ -4,6 +4,22 @@ import type {
   WorkoutBodyPartSet,
 } from "./types"
 
+const BODY_PART_ORDER: Record<BodyPart, number> = {
+  chest: 0,
+  back: 1,
+  legs: 2,
+  shoulders: 3,
+  arms: 4,
+  core: 5,
+}
+
+// 클릭 순서와 무관하게 부위를 배치하고 같은 부위의 세부 항목 순서는 유지한다.
+export function sortByBodyPart<T extends { part: BodyPart }>(items: readonly T[]): T[] {
+  return [...items].sort(
+    (left, right) => BODY_PART_ORDER[left.part] - BODY_PART_ORDER[right.part],
+  )
+}
+
 interface WorkoutBodyPartSetLabelFormatters {
   bodyPartLabel: (part: BodyPart) => string
   bodyPartDetailLabel: (detail: BodyPartDetail) => string
