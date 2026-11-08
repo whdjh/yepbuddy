@@ -1,5 +1,23 @@
 # Changelog
 
+## [1.7.0](https://github.com/whdjh/yepbuddy/compare/v1.6.5...v1.7.0) (2026-11-08)
+
+
+### Features
+
+* **dynamic:** 운동 경과 시간 표시 ([#110](https://github.com/whdjh/yepbuddy/issues/110)) ([72c9d66](https://github.com/whdjh/yepbuddy/commit/72c9d660aea044e539d24d7bf235a122ce49702c))
+* **protein:** 보충제 데이터 연동 ([#108](https://github.com/whdjh/yepbuddy/issues/108)) ([2d00bff](https://github.com/whdjh/yepbuddy/commit/2d00bffaa6ea6384b7621836c545f9c5ad8f55d8))
+* **workout:** HealthKit 기반 심박수 차트 개선 및 공통 차트 적용 ([#106](https://github.com/whdjh/yepbuddy/issues/106)) ([1e114a2](https://github.com/whdjh/yepbuddy/commit/1e114a23954ef2cdf5b51f1587ab90e2b20a63b4))
+
+
+### Bug Fixes
+
+* (main) 메인 루틴 목록의 완료 순서가 화면에 반영되도록 수정 ([#112](https://github.com/whdjh/yepbuddy/issues/112)) ([9b9f417](https://github.com/whdjh/yepbuddy/commit/9b9f4176dfab62c5e7e5e7b1f6495f5f9e2ec155))
+* **bottom-sheet:** 바텀 시트 유산소 이미지 수정 ([#103](https://github.com/whdjh/yepbuddy/issues/103)) ([cdbe1eb](https://github.com/whdjh/yepbuddy/commit/cdbe1ebb0fe1e334344dc3431632c038774fccd5))
+* **routine:** 루틴 및 세트 설정의 부위 순서 통일 ([#113](https://github.com/whdjh/yepbuddy/issues/113)) ([79565a5](https://github.com/whdjh/yepbuddy/commit/79565a58ed60eabb074935f10272837c591d7589))
+* **settings:** iOS 루틴 세부 설정 시트 스와이프 닫기 수정 ([#107](https://github.com/whdjh/yepbuddy/issues/107)) ([4b664c3](https://github.com/whdjh/yepbuddy/commit/4b664c3b308a8afccfc7f91bea28431d1a743620))
+* 메인 세션 목록을 완료 순서대로 정렬 ([#109](https://github.com/whdjh/yepbuddy/issues/109)) ([272aa4b](https://github.com/whdjh/yepbuddy/commit/272aa4bd086f4c0351b7508d4cec64e3748d0607))
+
 ## [1.6.5](https://github.com/whdjh/yepbuddy/compare/v1.6.4...v1.6.5) (2026-08-07)
 
 
